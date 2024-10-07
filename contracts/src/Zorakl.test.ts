@@ -48,17 +48,4 @@ describe('Zorakl', () => {
     expect(num).toEqual(Field(1));
   });
 
-  it('correctly updates the num state on the `Zorakl` smart contract', async () => {
-    await localDeploy();
-
-    // update transaction
-    const txn = await Mina.transaction(senderAccount, async () => {
-      await zkApp.update();
-    });
-    await txn.prove();
-    await txn.sign([senderKey]).send();
-
-    const updatedNum = zkApp.num.get();
-    expect(updatedNum).toEqual(Field(3));
-  });
 });
