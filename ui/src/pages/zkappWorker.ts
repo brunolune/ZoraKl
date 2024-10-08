@@ -60,10 +60,10 @@ const functions = {
   // },
   createUpdateTransaction: async (args: {}) => {
     const response = await fetch('/api/route');
-    const data = await response.json();
-    const { time, price, signature } = data;
+    const resData = await response.json();
+    const { data, signature} = resData;
     const transaction = await Mina.transaction(async () => {
-      await state.zkapp!.verifyUpdate(time, price, signature);
+      await state.zkapp!.verifyUpdate(data.time, data.price, signature);
     });
     state.transaction = transaction;
   },

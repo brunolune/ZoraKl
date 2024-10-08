@@ -14,12 +14,13 @@
   "dependencies": {
     "coi-serviceworker": "^0.1.7",
     "next": "14.2.3",
+    "o1js": "^1.*",
     "react": "^18",
-    "react-dom": "^18",
-    "o1js": "^1.*"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/node-fetch": "^2.6.11",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "typescript": "^5"
