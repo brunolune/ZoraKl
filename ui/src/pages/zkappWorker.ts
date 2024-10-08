@@ -4,7 +4,15 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
 
-import type { Add } from '../../../contracts/src/Add';
+// import type { Add } from '../../../contracts/src/Add';
+
+// const state = {
+//   Add: null as null | typeof Add,
+//   zkapp: null as null | Add,
+//   transaction: null as null | Transaction,
+// };
+
+import type { Zorakl } from '../../../contracts/src/Zorakl';
 
 const state = {
   Add: null as null | typeof Add,
@@ -23,7 +31,7 @@ const functions = {
     Mina.setActiveInstance(Network);
   },
   loadContract: async (args: {}) => {
-    const { Add } = await import('../../../contracts/build/src/Add.js');
+    const { Add } = await import('../../../contracts/build/src/Zorakl.js');
     state.Add = Add;
   },
   compileContract: async (args: {}) => {

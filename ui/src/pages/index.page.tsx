@@ -250,6 +250,9 @@ export default function Home() {
         <button className={styles.card} onClick={onRefreshCurrentNum}>
           Get Latest State
         </button>
+        <button className={styles.card} onClick={onRefreshCurrentNum}>
+          Get Latest State
+        </button>
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import { Field, SmartContract, state, State, method } from 'o1js';
+import { Field, SmartContract, state, State, method,Signature, PublicKey, Struct,  } from 'o1js';
 
 /**
  *
@@ -7,15 +7,23 @@ import { Field, SmartContract, state, State, method } from 'o1js';
  *
  * This file is safe to delete and replace with your own contract.
  */
+
+export class PriceData extends Struct({
+  price: Field,
+  time: Field,
+}){}
+
 export class Zorakl extends SmartContract {  
   // Define zkApp state
   @state(PublicKey) oraclePublicKey = State<PublicKey>();
   @state(Field) profit = State<Field>();
-  @state(Field) balance = State<Field>;
-
+  @state(Field) balance = State<Field>();
+  @state(PriceData) priceData = State<PriceData>();
+  
   // Define zkApp events
   events = {
-    verified: Field,
+    verified_price: Field,
+    verified_time: Field,
   };
 
   init() {
@@ -28,28 +36,38 @@ export class Zorakl extends SmartContract {
     // Initialize contract profit state
     this.profit.set(Field(0));
      // Initialize contract balance state
-     this.balance.set(Field(0));
+    this.balance.set(Field(0));
   }
 
-  @method async verify(id: Field, creditScore: Field, signature: Signature) {
+  @method async verify(time: Field, price: Field, signature: Signature) {
     // Get the oracle public key from the zkApp state
     const oraclePublicKey = this.oraclePublicKey.get();
     this.oraclePublicKey.requireEquals(oraclePublicKey);
     // Evaluate whether the signature is valid for the provided data
-    const validSignature = signature.verify(oraclePublicKey, [id, creditScore]);
+    const validSignature = signature.verify(oraclePublicKey, [price, time]);
     // Check that the signature is valid
     validSignature.assertTrue();
-    // Check that the provided credit score is 700 or higher
-    creditScore.assertGreaterThanOrEqual(Field(700));
-    // Emit an event containing the verified user's id
-    this.emitEvent('verified', id);
+    //store the last price and time
+    this.priceData.set(new PriceData(price,time));
+    // Emit an event containing the verified price
+    this.emitEvent("verified_price", price);
+    // Emit an event containing the verified time
+    this.emitEvent("verified_time", time);
   }
 
-  @method async buy(amount: Field) {
-  //todo
+  @method async getPriceData() {
+    return this.priceData.get();
+  }
+
+
+  @method async buy(signedData:SignedDataamount: Field) {
+  //call verifies data
+  //verifies/update balance
+  //verifies/update profit 
   }
 
   @method async sell(amount: Field) {
-    //todo
+    //call verifies data
+    
   }
 }
