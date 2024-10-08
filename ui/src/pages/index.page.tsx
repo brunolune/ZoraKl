@@ -6,7 +6,7 @@ import './reactCOIServiceWorker';
 import ZkappWorkerClient from './zkappWorkerClient';
 
 let transactionFee = 0.1;
-const ZKAPP_ADDRESS = 'B62qpXPvmKDf4SaFJynPsT6DyvuxMS9H1pT4TGonDT26m599m7dS9gP';
+const ZKAPP_ADDRESS = 'B62qkKpyQ9UDvyUX2je3D17WfSDnnSJihEiRMnhiZW5HGeAStNzuZ5f';
 
 export default function Home() {
   const [state, setState] = useState({
@@ -14,7 +14,8 @@ export default function Home() {
     hasWallet: null as null | boolean,
     hasBeenSetup: false,
     accountExists: false,
-    currentNum: null as null | Field,
+    currentPrice: null as null | Field,
+    latestRequestTime: null as null | Field,
     publicKey: null as null | PublicKey,
     zkappPublicKey: null as null | PublicKey,
     creatingTransaction: false,
@@ -83,8 +84,10 @@ export default function Home() {
         console.log('Getting zkApp state...');
         setDisplayText('Getting zkApp state...');
         await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
-        const currentNum = await zkappWorkerClient.getNum();
-        console.log(`Current state in zkApp: ${currentNum.toString()}`);
+        const currentPrice = await zkappWorkerClient.getPrice();
+        const latestRequestTime = await zkappWorkerClient.getTime();
+        console.log(`Current Mina price: ${currentPrice.toString()}`);
+        console.log(`Latest Fetching time: ${latestRequestTime.toString()}`);
         setDisplayText('');
 
         setState({
@@ -95,7 +98,8 @@ export default function Home() {
           publicKey,
           zkappPublicKey,
           accountExists,
-          currentNum,
+          currentPrice,
+          latestRequestTime,
         });
       }
     })();
@@ -142,7 +146,8 @@ export default function Home() {
     setDisplayText('Creating proof...');
     console.log('Creating proof...');
     await state.zkappWorkerClient!.proveUpdateTransaction();
-
+    //refresh current Price
+    await onRefreshCurrentPrice();
     console.log('Requesting send transaction...');
     setDisplayText('Requesting send transaction...');
     const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON();
@@ -169,18 +174,19 @@ export default function Home() {
   // -------------------------------------------------------
   // Refresh the current state
 
-  const onRefreshCurrentNum = async () => {
+  const onRefreshCurrentPrice = async () => {
     console.log('Getting zkApp state...');
     setDisplayText('Getting zkApp state...');
 
     await state.zkappWorkerClient!.fetchAccount({
       publicKey: state.zkappPublicKey!,
     });
-    const currentNum = await state.zkappWorkerClient!.getNum();
-    setState({ ...state, currentNum });
-    console.log(`Current state in zkApp: ${currentNum.toString()}`);
+    const currentPrice = await state.zkappWorkerClient!.getPrice();
+    setState({ ...state, currentPrice });
+    console.log(`Current price in zkApp: ${currentPrice.toString()}`);
     setDisplayText('');
   };
+
 
   // -------------------------------------------------------
   // Create UI elements
@@ -238,20 +244,14 @@ export default function Home() {
     mainContent = (
       <div style={{ justifyContent: 'center', alignItems: 'center' }}>
         <div className={styles.center} style={{ padding: 0 }}>
-          Current state in zkApp: {state.currentNum!.toString()}{' '}
+          Current Coingecko's Mina price in zkApp: {state.currentPrice!.toString()+`$`}{' '}
         </div>
         <button
           className={styles.card}
           onClick={onSendTransaction}
           disabled={state.creatingTransaction}
         >
-          Send Transaction
-        </button>
-        <button className={styles.card} onClick={onRefreshCurrentNum}>
-          Get Latest State
-        </button>
-        <button className={styles.card} onClick={onRefreshCurrentNum}>
-          Get Latest State
+          Get Latest Verified Price
         </button>
       </div>
     );

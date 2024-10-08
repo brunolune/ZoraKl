@@ -60,7 +60,8 @@ async function getSignedPriceData(asset: string) {
   );
 
   return {
-    data: { price: priceWithDecimals, time: unixTimestamp },
+    price: priceWithDecimals,
+    time: unixTimestamp,
     signature: signature.signature,
     publicKey: signature.publicKey,
   };

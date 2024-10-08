@@ -58,9 +58,12 @@ const functions = {
   //   });
   //   state.transaction = transaction;
   // },
-  createUpdateTransaction: async (args: { time: Field, price: Field, signature: Signature }) => {
+  createUpdateTransaction: async (args: {}) => {
+    const response = await fetch('/api/route');
+    const data = await response.json();
+    const { time, price, signature } = data;
     const transaction = await Mina.transaction(async () => {
-      await state.zkapp!.verifyUpdate(args.time, args.price, args.signature);
+      await state.zkapp!.verifyUpdate(time, price, signature);
     });
     state.transaction = transaction;
   },
