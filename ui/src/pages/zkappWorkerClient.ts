@@ -38,8 +38,13 @@ export default class ZkappWorkerClient {
     });
   }
 
-  async getNum(): Promise<Field> {
-    const result = await this._call('getNum', {});
+  async getPrice(): Promise<Field> {
+    const result = await this._call('getPrice', {});
+    return Field.fromJSON(JSON.parse(result as string));
+  }
+
+  async getTime(): Promise<Field> {
+    const result = await this._call('getTime', {});
     return Field.fromJSON(JSON.parse(result as string));
   }
 

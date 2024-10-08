@@ -62,7 +62,7 @@ describe('Zorakl', () => {
       );
 
       const txn = await Mina.transaction(senderAccount, async () => {
-        await zkApp.verify(time, price, signature);
+        await zkApp.verifyUpdate(time, price, signature);
       });
       await txn.prove();
       await txn.sign([senderKey]).send();

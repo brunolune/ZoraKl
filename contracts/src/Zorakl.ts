@@ -42,7 +42,7 @@ export class Zorakl extends SmartContract {
     //this.balance.set(Field(0));
   }
 
-  @method async verify(time: Field, price: Field, signature: Signature) {
+  @method async verifyUpdate(time: Field, price: Field, signature: Signature) {
     // Get the oracle public key from the zkApp state
     const oraclePublicKey = this.oraclePublicKey.get();
     this.oraclePublicKey.requireEquals(oraclePublicKey);
@@ -50,7 +50,7 @@ export class Zorakl extends SmartContract {
     const validSignature = signature.verify(oraclePublicKey, [price, time]);
     // Check that the signature is valid
     validSignature.assertTrue();
-    //store the last price and time
+    //update the last price and time
     this.priceData.set({price:price, time:time});
     // Emit an event containing the verified price
     this.emitEvent("verified_price", price);
@@ -58,9 +58,9 @@ export class Zorakl extends SmartContract {
     this.emitEvent("verified_time", time);
   }
 
-  @method.returns(PriceData) async getPriceData() : Promise<PriceData> {
-    return this.priceData.get();
-  }
+  // @method.returns(PriceData) async getPriceData() : Promise<PriceData> {
+  //   return this.priceData.get();
+  // }
   
 
   // @method async buy(signedData:SignedDataamount: Field) {

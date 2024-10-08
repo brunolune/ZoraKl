@@ -1,22 +1,15 @@
-import { Mina, PublicKey, fetchAccount } from 'o1js';
+import { Field, Mina, PublicKey, Signature, fetchAccount } from 'o1js';
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
 
-// import type { Add } from '../../../contracts/src/Add';
-
-// const state = {
-//   Add: null as null | typeof Add,
-//   zkapp: null as null | Add,
-//   transaction: null as null | Transaction,
-// };
-
 import type { Zorakl } from '../../../contracts/src/Zorakl';
+import { get } from 'http';
 
 const state = {
-  Add: null as null | typeof Add,
-  zkapp: null as null | Add,
+  Zorakl: null as null | typeof Zorakl,
+  zkapp: null as null | Zorakl,
   transaction: null as null | Transaction,
 };
 
@@ -31,11 +24,11 @@ const functions = {
     Mina.setActiveInstance(Network);
   },
   loadContract: async (args: {}) => {
-    const { Add } = await import('../../../contracts/build/src/Zorakl.js');
-    state.Add = Add;
+    const { Zorakl } = await import('../../../contracts/build/src/Zorakl.js');
+    state.Zorakl = Zorakl;
   },
   compileContract: async (args: {}) => {
-    await state.Add!.compile();
+    await state.Zorakl!.compile();
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
@@ -43,15 +36,31 @@ const functions = {
   },
   initZkappInstance: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
-    state.zkapp = new state.Add!(publicKey);
+    state.zkapp = new state.Zorakl!(publicKey);
   },
-  getNum: async (args: {}) => {
-    const currentNum = await state.zkapp!.num.get();
-    return JSON.stringify(currentNum.toJSON());
+  // getNum: async (args: {}) => {
+  //   const currentNum = await state.zkapp!.num.get();
+  //   return JSON.stringify(currentNum.toJSON());
+  // },
+  getPrice: async (args: {}) => {
+    const priceData = await state.zkapp!.priceData.get();
+    const price = priceData.price;
+    return JSON.stringify(price.toJSON());
   },
-  createUpdateTransaction: async (args: {}) => {
+  getTime: async (args: {}) => {
+    const priceData = await state.zkapp!.priceData.get();
+    const time = priceData.time;
+    return JSON.stringify(time.toJSON());
+  },
+  // createUpdateTransaction: async (args: {}) => {
+  //   const transaction = await Mina.transaction(async () => {
+  //     await state.zkapp!.verify();
+  //   });
+  //   state.transaction = transaction;
+  // },
+  createUpdateTransaction: async (args: { time: Field, price: Field, signature: Signature }) => {
     const transaction = await Mina.transaction(async () => {
-      await state.zkapp!.update();
+      await state.zkapp!.verifyUpdate(args.time, args.price, args.signature);
     });
     state.transaction = transaction;
   },
