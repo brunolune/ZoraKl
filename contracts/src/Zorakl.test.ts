@@ -1,11 +1,9 @@
 import { AccountUpdate, Field, Mina, PrivateKey, PublicKey, Signature } from 'o1js';
 import { Zorakl } from './Zorakl';
-//import { PriceData } from './Zorakl';
 
 /*
  * This file specifies how to test the `Zorakl` example smart contract.
  */
-
 
 let proofsEnabled = false;
 // The public key of our trusted data provider
@@ -57,11 +55,10 @@ describe('Zorakl', () => {
     it('emits a `time` and `price` events containing the pricefeed time and price if the provider is valid source', async () => {
       await localDeploy();
 
-      const price = Field(53008900);
-      const time = Field(1728406858);
-      //const priceData = new PriceData({ price, time });
+      const price = Field(54118599);
+      const time = Field(1728318046);
       const signature = Signature.fromBase58(
-        '7mXJAj3ewMN6ziouSigZ5x8QECUSb6u54Qgk4pdx65nUTm95t2h8mkthAvoEzA6E1j2V2PAiPQwEnfNonKPHJPrHpX8sZTVf'
+        '7mXT4dZ3R6so6CYpcWgN5MZzaKmYhyntFDeCuxFvkBUeMvpQ4TFD5C5WK3AoDEAkAfMkzS1YuoKMDRqSMr4FJhJWwkPebmbU'
       );
 
       const txn = await Mina.transaction(senderAccount, async () => {

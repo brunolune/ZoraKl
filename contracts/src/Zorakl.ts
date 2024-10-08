@@ -2,10 +2,7 @@ import { Field, SmartContract, state, State, method,Signature, PublicKey, Struct
 
 /**
  *
- * The Zorakl contract initializes the state variable 'num' to be a Field(1) value by default when deployed.
- * When the 'update' method is called, the Add contract adds Field(2) to its 'num' contract state.
- *
- * This file is safe to delete and replace with your own contract.
+ * The Zorakl contract ...
  */
 
 export class PriceData extends Struct({
@@ -28,7 +25,6 @@ export class Zorakl extends SmartContract {
   events = {
     verified_price: Field,
     verified_time: Field,
-    token_name: Field,
   };
 
   init() {
@@ -38,6 +34,8 @@ export class Zorakl extends SmartContract {
     this.oraclePublicKey.set(PublicKey.fromBase58(ORACLE_PUBLIC_KEY));
     // Specify that caller should include signature with tx instead of proof
     this.requireSignature();
+    // Initialize contract priceData
+    this.priceData.set({price: Field(0), time: Field(0)});
     // Initialize contract profit state
     //this.profit.set(Field(0));
      // Initialize contract balance state
@@ -53,17 +51,17 @@ export class Zorakl extends SmartContract {
     // Check that the signature is valid
     validSignature.assertTrue();
     //store the last price and time
-    this.priceData.set(new PriceData({price, time}));
+    this.priceData.set({price:price, time:time});
     // Emit an event containing the verified price
     this.emitEvent("verified_price", price);
     // Emit an event containing the verified time
     this.emitEvent("verified_time", time);
   }
 
-  /*@method async getPriceData() {
+  @method.returns(PriceData) async getPriceData() : Promise<PriceData> {
     return this.priceData.get();
   }
-
+  
 
   // @method async buy(signedData:SignedDataamount: Field) {
   // //call verifies data
@@ -71,8 +69,7 @@ export class Zorakl extends SmartContract {
   // //verifies/update profit
   // }
 
-  @method async sell(amount: Field) {
-    //call verifies data
-    
-  }*/
+  // @method async sell(amount: Field) {
+  //   //call verifies data 
+  // }
 }
