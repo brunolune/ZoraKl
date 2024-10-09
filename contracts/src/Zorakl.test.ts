@@ -1,4 +1,12 @@
-import { AccountUpdate, Field, Mina, PrivateKey, PublicKey, Signature ,Int64} from 'o1js';
+import {
+  AccountUpdate,
+  Field,
+  Mina,
+  PrivateKey,
+  PublicKey,
+  Signature,
+  Int64,
+} from 'o1js';
 import { Zorakl } from './Zorakl';
 
 /*
@@ -51,53 +59,139 @@ describe('Zorakl', () => {
     expect(oraclePublicKey).toEqual(PublicKey.fromBase58(ORACLE_PUBLIC_KEY));
   });
 
-  describe('hardcoded values', () => {
-    it('emits a `time` and `price` events containing the pricefeed time and price if the provider is valid source', async () => {
-      await localDeploy();
+  it('emits a `time` and `price` events containing the pricefeed time and price if the provider is valid source', async () => {
+    await localDeploy();
 
-      const price = Field(54118599);
-      const time = Field(1728318046);
-      const signature = Signature.fromBase58(
-        '7mXT4dZ3R6so6CYpcWgN5MZzaKmYhyntFDeCuxFvkBUeMvpQ4TFD5C5WK3AoDEAkAfMkzS1YuoKMDRqSMr4FJhJWwkPebmbU'
-      );
+    const price = Field(54118599);
+    const time = Field(1728318046);
+    const signature = Signature.fromBase58(
+      '7mXT4dZ3R6so6CYpcWgN5MZzaKmYhyntFDeCuxFvkBUeMvpQ4TFD5C5WK3AoDEAkAfMkzS1YuoKMDRqSMr4FJhJWwkPebmbU'
+    );
 
-      const txn = await Mina.transaction(senderAccount, async () => {
-        await zkApp.verifyUpdate(time, price, signature);
-      });
-      await txn.prove();
-      await txn.sign([senderKey]).send();
-
-      const events = await zkApp.fetchEvents();
-      const verifiedEventValuePrice = events[1].event.data.toFields(null)[0];
-      expect(verifiedEventValuePrice).toEqual(price);
-      const verifiedEventValueTime = events[0].event.data.toFields(null)[0];
-      expect(verifiedEventValueTime).toEqual(time);
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.verifyUpdate(time, price, signature);
     });
+    await txn.prove();
+    await txn.sign([senderKey]).send();
 
-    it('verifies the MinaBalance is correctly updated after Buy', async () => {
-      await localDeploy();
+    const events = await zkApp.fetchEvents();
+    const verifiedEventValuePrice = events[1].event.data.toFields(null)[0];
+    expect(verifiedEventValuePrice).toEqual(price);
+    const verifiedEventValueTime = events[0].event.data.toFields(null)[0];
+    expect(verifiedEventValueTime).toEqual(time);
+  });
 
-      zkApp.priceData.requireEquals(zkApp.priceData.get());
-      const data = zkApp.priceData.get();
-      const usdBalanceBefore = zkApp.usdBalance.get();
-      const coinBalanceBefore = zkApp.coinBalance.get();
-      const txn = await Mina.transaction(senderAccount, async () => {
-        await zkApp.buy(data.time,data. price);
-      });
-      await txn.prove();
-      await txn.sign([senderKey]).send();
+  it('emits a `time` and `price` events containing the pricefeed time and price if the provider is valid source', async () => {
+    await localDeploy();
 
-      const coinBalanceAfter = zkApp.coinBalance.get();
-      expect(coinBalanceAfter).toEqual(coinBalanceBefore.add(Field(1)));
-      const usdBalanceAfter = zkApp.usdBalance.get();
-      
-      // expect(usdBalanceAfter).toEqual(usdBalanceBefore.sub(Int64.from(data.price)))
-      console.log("usdBalanceAfter=",usdBalanceAfter)
+    //use API
+    const response = await fetch('https://zora-kl.vercel.app/api/asset-price');
+    const data = await response.json();
+
+    const time = Field(data.data.time);
+    const price = Field(data.data.price);
+    const signature = Signature.fromBase58(data.signature);
+
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.verifyUpdate(time, price, signature);
     });
+    await txn.prove();
+    await txn.sign([senderKey]).send();
 
+    const events = await zkApp.fetchEvents();
+    const verifiedEventValuePrice = events[1].event.data.toFields(null)[0];
+    expect(verifiedEventValuePrice).toEqual(price);
+    const verifiedEventValueTime = events[0].event.data.toFields(null)[0];
+    expect(verifiedEventValueTime).toEqual(time);
+  });
 
+  it('verifies transaction rejected when Sell transaction is called while coinBalance is zero', async () => {
+    await localDeploy();
 
-    /*it('throws an error if the credit score is below 700 even if the provided signature is valid', async () => {
+    
+    const price = Field(54118599);
+    const time = Field(1728318046);
+    expect(async () => {
+      const txn = await Mina.transaction(senderAccount, async () => {
+        await zkApp.sell(time, price);
+      });
+    }).rejects;
+  });
+
+  it('verifies the coinBalance and usdBalance are correctly updated after Buy transaction', async () => {
+    await localDeploy();
+
+    //inputs data
+    const price = Field(54118599);
+    const time = Field(1728318046);
+
+    //to avoid rejection due to inequalities of input data with zkApp price and time state
+    zkApp.price.set(price);
+    zkApp.time.set(time);
+    const usdBalanceBefore = zkApp.usdBalance.get();
+    const coinBalanceBefore = zkApp.coinBalance.get();
+
+    //buy transaction
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.buy(time, price);
+    });
+    await txn.prove();
+    await txn.sign([senderKey]).send();
+
+    const coinBalanceAfter = zkApp.coinBalance.get();
+    expect(coinBalanceAfter).toEqual(coinBalanceBefore.add(Field(1)));
+    const usdBalanceAfter = zkApp.usdBalance.get();
+
+    expect(usdBalanceAfter).toEqual(usdBalanceBefore.sub(price));
+    console.log('usdBalanceAfter=', usdBalanceAfter);
+  });
+
+  it('verifies the coinBalance and usdBalance are correctly updated after Sell transaction', async () => {
+    await localDeploy();
+
+    //inputs data
+    let price = Field(54118599);
+    let time = Field(1728318046);
+
+    //to avoid rejection due to inequalities of input data with zkApp price and time state
+    zkApp.price.set(price);
+    zkApp.time.set(time);
+
+    //buy transaction
+    const txn1 = await Mina.transaction(senderAccount, async () => {
+      await zkApp.buy(time, price);
+    });
+    await txn1.prove();
+    await txn1.sign([senderKey]).send();
+
+    //inputs data
+    price = Field(55118599);
+    time = Field(1728319046);
+    
+    //to avoid rejection due to inequalities of input data with zkApp price and time state
+    zkApp.price.set(price);
+    zkApp.time.set(time);
+
+    //sell transaction
+    const usdBalanceBefore = zkApp.usdBalance.get();
+    const coinBalanceBefore = zkApp.coinBalance.get();
+    const txn2 = await Mina.transaction(senderAccount, async () => {
+      await zkApp.sell(time, price);
+    });
+    await txn2.prove();
+    await txn2.sign([senderKey]).send();
+
+    const coinBalanceAfter = zkApp.coinBalance.get();
+    expect(coinBalanceAfter).toEqual(coinBalanceBefore.sub(Field(1)));
+    const usdBalanceAfter = zkApp.usdBalance.get();
+
+    expect(usdBalanceAfter).toEqual(usdBalanceBefore.sub(price));
+    console.log('usdBalanceAfter=', usdBalanceAfter);
+    //verifies hasProfit is true
+    expect(zkApp.hasProfit.get().assertTrue());
+  });
+
+  /*it('throws an error if the credit score is below 700 even if the provided signature is valid', async () => {
       await localDeploy();
 
       const id = Field(1);
@@ -128,7 +222,6 @@ describe('Zorakl', () => {
         });
       }).rejects;
     });*/
-  });
 
   /*describe('actual API requests', () => {
     it('emits an `id` event containing the users id if their credit score is above 700 and the provided signature is valid', async () => {
