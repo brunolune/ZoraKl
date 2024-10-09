@@ -111,7 +111,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       if (state.hasBeenSetup && !state.accountExists) {
-        for (;;) {
+        for (; ;) {
           setDisplayText('Checking if fee payer account exists...');
           console.log('Checking if fee payer account exists...');
           const res = await state.zkappWorkerClient!.fetchAccount({
@@ -130,7 +130,7 @@ export default function Home() {
 
   // -------------------------------------------------------
   // Send a transaction
-
+ 
   const onSendTransaction = async () => {
     setState({ ...state, creatingTransaction: true });
 
@@ -146,8 +146,7 @@ export default function Home() {
     setDisplayText('Creating proof...');
     console.log('Creating proof...');
     await state.zkappWorkerClient!.proveUpdateTransaction();
-    //refresh current Price
-    await onRefreshCurrentPrice();
+
     console.log('Requesting send transaction...');
     setDisplayText('Requesting send transaction...');
     const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON();
@@ -182,11 +181,26 @@ export default function Home() {
       publicKey: state.zkappPublicKey!,
     });
     const currentPrice = await state.zkappWorkerClient!.getPrice();
-    setState({ ...state, currentPrice });
-    console.log(`Current price in zkApp: ${currentPrice.toString()}`);
+    const currentPriceUSD = Number(currentPrice) / 10 ** 8;
+    setState(prevState=>({...prevState, currentPrice: currentPrice,}) );
+
+    console.log(`Current price in zkApp: ${currentPriceUSD.toString()}$`);
     setDisplayText('');
   };
 
+  const onRefreshLatestRequestTime = async () => {
+    console.log('Getting zkApp state...');
+    setDisplayText('Getting zkApp state...');
+
+    await state.zkappWorkerClient!.fetchAccount({
+      publicKey: state.zkappPublicKey!,
+    });
+    const latestRequestTime = await state.zkappWorkerClient!.getTime();
+    setState(prevState=>({...prevState, latestRequestTime: latestRequestTime,}) );
+    console.log(`Latest request time in zkApp (unix time): ${latestRequestTime.toString()}$`);
+    setDisplayText('');
+  };
+  
 
   // -------------------------------------------------------
   // Create UI elements
@@ -209,7 +223,7 @@ export default function Home() {
       rel="noreferrer"
       style={{ textDecoration: 'underline' }}
     >
-      View transaction
+      View Last transaction
     </a>
   ) : (
     displayText
@@ -241,17 +255,27 @@ export default function Home() {
 
   let mainContent;
   if (state.hasBeenSetup && state.accountExists) {
+    const currentPriceUSD = Number(state.currentPrice) / 10 ** 8;
+    const latestRequestDate= new Date(Number(state.latestRequestTime!)*1000);
     mainContent = (
       <div style={{ justifyContent: 'center', alignItems: 'center' }}>
         <div className={styles.center} style={{ padding: 0 }}>
-          Current Coingecko's Mina price in zkApp: {state.currentPrice!.toString()+`$`}{' '}
+          Current Coingecko's Mina price in zkApp: {currentPriceUSD!.toString() + `$`}{' '}
+          <br />
+          Latest Request Time: {latestRequestDate.toString()}
         </div>
         <button
           className={styles.card}
           onClick={onSendTransaction}
           disabled={state.creatingTransaction}
         >
-          Get Latest Verified Price
+          Call ZK-Oracle
+        </button>
+        <button className={styles.card} onClick={onRefreshCurrentPrice}>
+          Refresh Price
+        </button>
+        <button className={styles.card} onClick={onRefreshLatestRequestTime}>
+          Refresh Time
         </button>
       </div>
     );

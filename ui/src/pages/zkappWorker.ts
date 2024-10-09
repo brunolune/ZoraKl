@@ -59,11 +59,13 @@ const functions = {
   //   state.transaction = transaction;
   // },
   createUpdateTransaction: async (args: {}) => {
-    const response = await fetch('/api/route');
+    const response = await fetch('https://zora-kl.vercel.app/api/asset-price');
     const resData = await response.json();
     const { data, signature} = resData;
+    console.log("*******************FROM ENDPOINT**********************************");
+    console.log("data.time:", data.time, "data.price:", data.price);
     const transaction = await Mina.transaction(async () => {
-      await state.zkapp!.verifyUpdate(data.time, data.price, signature);
+      await state.zkapp!.verifyUpdate(Field(data.time), Field(data.price), Signature.fromBase58(signature));
     });
     state.transaction = transaction;
   },
