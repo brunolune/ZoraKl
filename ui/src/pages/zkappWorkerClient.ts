@@ -56,6 +56,13 @@ export default class ZkappWorkerClient {
     return this._call('proveUpdateTransaction', {});
   }
 
+  createBuyTransaction(args: { [key: string]: any }) {
+    return this._call('createBuyTransaction', args);
+  }
+
+  proveBuyTransaction() {
+    return this._call('proveUpdateTransaction', {});
+  }
   async getTransactionJSON() {
     const result = await this._call('getTransactionJSON', {});
     return result;

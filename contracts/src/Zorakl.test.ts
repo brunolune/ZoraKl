@@ -1,4 +1,4 @@
-import { AccountUpdate, Field, Mina, PrivateKey, PublicKey, Signature } from 'o1js';
+import { AccountUpdate, Field, Mina, PrivateKey, PublicKey, Signature ,Int64} from 'o1js';
 import { Zorakl } from './Zorakl';
 
 /*
@@ -73,6 +73,29 @@ describe('Zorakl', () => {
       const verifiedEventValueTime = events[0].event.data.toFields(null)[0];
       expect(verifiedEventValueTime).toEqual(time);
     });
+
+    it('verifies the MinaBalance is correctly updated after Buy', async () => {
+      await localDeploy();
+
+      zkApp.priceData.requireEquals(zkApp.priceData.get());
+      const data = zkApp.priceData.get();
+      const usdBalanceBefore = zkApp.usdBalance.get();
+      const coinBalanceBefore = zkApp.coinBalance.get();
+      const txn = await Mina.transaction(senderAccount, async () => {
+        await zkApp.buy(data.time,data. price);
+      });
+      await txn.prove();
+      await txn.sign([senderKey]).send();
+
+      const coinBalanceAfter = zkApp.coinBalance.get();
+      expect(coinBalanceAfter).toEqual(coinBalanceBefore.add(Field(1)));
+      const usdBalanceAfter = zkApp.usdBalance.get();
+      
+      // expect(usdBalanceAfter).toEqual(usdBalanceBefore.sub(Int64.from(data.price)))
+      console.log("usdBalanceAfter=",usdBalanceAfter)
+    });
+
+
 
     /*it('throws an error if the credit score is below 700 even if the provided signature is valid', async () => {
       await localDeploy();

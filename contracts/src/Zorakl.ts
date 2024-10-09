@@ -1,4 +1,4 @@
-import { Field, SmartContract, state, State, method,Signature, PublicKey, Struct,  } from 'o1js';
+import { Field, SmartContract, state, State, method,Signature, PublicKey, Struct, Int64,  } from 'o1js';
 
 /**
  *
@@ -17,8 +17,8 @@ const ORACLE_PUBLIC_KEY =
 export class Zorakl extends SmartContract {  
   // Define zkApp state
   @state(PublicKey) oraclePublicKey = State<PublicKey>();
-  //@state(Field) profit = State<Field>();
-  //@state(Field) balance = State<Field>();
+  @state(Field) coinBalance = State<Field>();
+  @state(Int64) usdBalance = State<Int64>();
   @state(PriceData) priceData = State<PriceData>();
   
   // Define zkApp events
@@ -36,10 +36,10 @@ export class Zorakl extends SmartContract {
     this.requireSignature();
     // Initialize contract priceData
     this.priceData.set({price: Field(0), time: Field(0)});
-    // Initialize contract profit state
-    //this.profit.set(Field(0));
-     // Initialize contract balance state
-    //this.balance.set(Field(0));
+    // Initialize minaBalance state
+    this.coinBalance.set(Field(0));
+     // Initialize usdBalance state
+    this.usdBalance.set(Int64.from(0));
   }
 
   @method async verifyUpdate(time: Field, price: Field, signature: Signature) {
@@ -58,18 +58,22 @@ export class Zorakl extends SmartContract {
     this.emitEvent("verified_time", time);
   }
 
-  // @method.returns(PriceData) async getPriceData() : Promise<PriceData> {
-  //   return this.priceData.get();
-  // }
-  
-
-  // @method async buy(signedData:SignedDataamount: Field) {
-  // //call verifies data
-  // //verifies/update balance
-  // //verifies/update profit
-  // }
+  @method async buy(time: Field, price: Field) {
+    //verifies that the price and timedisplayed in ui and in zkapp are equal
+    this.priceData.requireEquals(this.priceData.get());
+    price.assertEquals(this.priceData.get().price);
+    time.assertEquals(this.priceData.get().time);
+    //verifies/update balance ?
+    const currentCoinBalance = this.coinBalance.getAndRequireEquals();
+    this.coinBalance.set(currentCoinBalance.add(Field(1)));
+    // const currentUSDBalance = this.usdBalance.getAndRequireEquals();
+    // this.usdBalance.set(currentUSDBalance.sub(Int64.from(price)));
+  }
 
   // @method async sell(amount: Field) {
+  //   //verifies Minabalance>0
   //   //call verifies data 
+  //   //update balances
   // }
+  
 }

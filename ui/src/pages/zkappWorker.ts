@@ -1,11 +1,11 @@
-import { Field, Mina, PublicKey, Signature, fetchAccount } from 'o1js';
+import { Field, Mina, PublicKey, Signature, fetchAccount } from "o1js";
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
 
-import type { Zorakl } from '../../../contracts/src/Zorakl';
-import { get } from 'http';
+import type { Zorakl } from "../../../contracts/src/Zorakl";
+import { get } from "http";
 
 const state = {
   Zorakl: null as null | typeof Zorakl,
@@ -18,13 +18,13 @@ const state = {
 const functions = {
   setActiveInstanceToDevnet: async (args: {}) => {
     const Network = Mina.Network(
-      'https://api.minascan.io/node/devnet/v1/graphql'
+      "https://api.minascan.io/node/devnet/v1/graphql"
     );
-    console.log('Devnet network instance configured.');
+    console.log("Devnet network instance configured.");
     Mina.setActiveInstance(Network);
   },
   loadContract: async (args: {}) => {
-    const { Zorakl } = await import('../../../contracts/build/src/Zorakl.js');
+    const { Zorakl } = await import("../../../contracts/build/src/Zorakl.js");
     state.Zorakl = Zorakl;
   },
   compileContract: async (args: {}) => {
@@ -52,24 +52,40 @@ const functions = {
     const time = priceData.time;
     return JSON.stringify(time.toJSON());
   },
-  // createUpdateTransaction: async (args: {}) => {
-  //   const transaction = await Mina.transaction(async () => {
-  //     await state.zkapp!.verify();
-  //   });
-  //   state.transaction = transaction;
-  // },
+
   createUpdateTransaction: async (args: {}) => {
-    const response = await fetch('https://zora-kl.vercel.app/api/asset-price');
+    const response = await fetch("https://zora-kl.vercel.app/api/asset-price");
     const resData = await response.json();
-    const { data, signature} = resData;
-    console.log("*******************FROM ENDPOINT**********************************");
+    const { data, signature } = resData;
+    console.log(
+      "*******************FROM ENDPOINT**********************************"
+    );
     console.log("data.time:", data.time, "data.price:", data.price);
     const transaction = await Mina.transaction(async () => {
-      await state.zkapp!.verifyUpdate(Field(data.time), Field(data.price), Signature.fromBase58(signature));
+      await state.zkapp!.verifyUpdate(
+        Field(data.time),
+        Field(data.price),
+        Signature.fromBase58(signature)
+      );
     });
     state.transaction = transaction;
   },
   proveUpdateTransaction: async (args: {}) => {
+    await state.transaction!.prove();
+  },
+  createBuyTransaction: async (args: { [key: string]: any }) => {
+    const time = args.time;
+    const price = args.price;
+    console.log('In createBuyTransaction, time :', time, 'price:', price);
+    if (isNaN(time) || isNaN(price)) {
+      throw new Error('Invalid time or price value');
+    }
+    const transaction = await Mina.transaction(async () => {
+      await state.zkapp!.buy(Field(time), Field(price));
+    });
+    state.transaction = transaction;
+  },
+  proveBuyTransaction: async (args: {}) => {
     await state.transaction!.prove();
   },
   getTransactionJSON: async (args: {}) => {
@@ -92,9 +108,9 @@ export type ZkappWorkerReponse = {
   data: any;
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   addEventListener(
-    'message',
+    "message",
     async (event: MessageEvent<ZkappWorkerRequest>) => {
       const returnData = await functions[event.data.fn](event.data.args);
 
@@ -107,4 +123,4 @@ if (typeof window !== 'undefined') {
   );
 }
 
-console.log('Web Worker Successfully Initialized.');
+console.log("Web Worker Successfully Initialized.");
