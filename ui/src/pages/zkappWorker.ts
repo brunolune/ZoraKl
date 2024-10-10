@@ -43,13 +43,11 @@ const functions = {
   //   return JSON.stringify(currentNum.toJSON());
   // },
   getPrice: async (args: {}) => {
-    const priceData = await state.zkapp!.priceData.get();
-    const price = priceData.price;
+    const price = await state.zkapp!.price.get();
     return JSON.stringify(price.toJSON());
   },
   getTime: async (args: {}) => {
-    const priceData = await state.zkapp!.priceData.get();
-    const time = priceData.time;
+    const time= await state.zkapp!.time.get();
     return JSON.stringify(time.toJSON());
   },
 

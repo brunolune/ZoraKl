@@ -43,7 +43,7 @@ export class Zorakl extends SmartContract {
     // Initialize minaBalance state
     this.coinBalance.set(Field(0));
      // Initialize usdBalance state
-    this.usdBalance.set(Field(10**20));
+    this.usdBalance.set(Field(10**18));
   }
 
   @method async verifyUpdate(time: Field, price: Field, signature: Signature) {
