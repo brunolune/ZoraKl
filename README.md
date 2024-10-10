@@ -38,3 +38,5 @@ cd ZoraKl/ui
 npm install
 node run dev
 ```
+![ui_1](./Screenshot_from_2024-10-10_11-55-49)
+![ui_2](./Screenshot_from_2024-10-10_13-01-54)
