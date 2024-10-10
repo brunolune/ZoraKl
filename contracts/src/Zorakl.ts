@@ -86,7 +86,7 @@ export class Zorakl extends SmartContract {
     const currentUSDBalance = this.usdBalance.getAndRequireEquals();
     this.usdBalance.set(currentUSDBalance.add(price));
     //check if we have profit   
-    this.hasProfit.set(this.usdBalance.get().greaterThan(Field(10**20)));
+    this.hasProfit.set(this.usdBalance.get().greaterThan(Field(10**18)));
   }
   
 }
