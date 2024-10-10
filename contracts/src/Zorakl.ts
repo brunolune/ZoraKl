@@ -5,10 +5,10 @@ import { Field, SmartContract, state, State, method,Signature, PublicKey, Struct
  * The Zorakl contract ...
  */
 
-export class PriceData extends Struct({
-  price: Field,
-  time: Field,
-}){}
+// export class PriceData extends Struct({
+//   price: Field,
+//   time: Field,
+// }){}
 
 // The public key of our trusted data provider
 const ORACLE_PUBLIC_KEY =
