@@ -233,6 +233,49 @@ export default function Home() {
     setState({ ...state, creatingTransaction: false });
   };
 
+  const onSell= async () => {
+
+    // setState({ ...state, creatingTransaction: true });
+
+    // setDisplayText('Creating a transaction...');
+    // console.log('Creating a transaction...');
+
+    // await state.zkappWorkerClient!.fetchAccount({
+    //   publicKey: state.publicKey!,
+    // });
+    // const args = {
+    //   time: state.latestRequestTime,
+    //   price: state.currentPrice,
+    // };
+    // await state.zkappWorkerClient!.createSellTransaction(args);
+
+    // setDisplayText('Creating proof...');
+    // console.log('Creating proof...');
+    // await state.zkappWorkerClient!.proveSellTransaction();
+
+    // console.log('Requesting send transaction...');
+    // setDisplayText('Requesting send transaction...');
+    // const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON();
+
+    // setDisplayText('Getting transaction JSON...');
+    // console.log('Getting transaction JSON...');
+    // const { hash } = await (window as any).mina.sendTransaction({
+    //   transaction: transactionJSON,
+    //   feePayer: {
+    //     fee: transactionFee,
+    //     memo: '',
+    //   },
+    // });
+
+    // const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
+    // console.log(`View transaction at ${transactionLink}`);
+
+    // setTransactionLink(transactionLink);
+    // setDisplayText(transactionLink);
+
+    // setState({ ...state, creatingTransaction: false });
+  };
+
   // -------------------------------------------------------
   // Create UI elements
 
@@ -309,6 +352,13 @@ export default function Home() {
         <button className={styles.card} onClick={onBuy}>
           Buy 1 Coin virtually 
         </button>
+        <button className={styles.card} onClick={onSell}>
+          Sell 1 Coin virtually 
+        </button>
+        <br/>
+        <div  style={{ padding: 20 }}>
+          hasProfit in zkApp: ? {' '}
+        </div>
       </div>
     );
   }
