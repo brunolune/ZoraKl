@@ -32,7 +32,7 @@ npm run test
 
 ## Run the UI
 ```sh
-cd ../ui
+cd ZoraKl/ui
 ```
 ```sh
 npm install
