@@ -26,10 +26,10 @@ npm run build
 npm run test
 ```
 
-## Run the project as a whole
+## Run the UI
 ```sh
 cd ../ui
 ```
 ```sh
-node run build
+node run dev
 ```
