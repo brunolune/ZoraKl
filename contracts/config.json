@@ -27,6 +27,15 @@
       "feepayerAlias": "03-deploy",
       "fee": "0.5",
       "smartContract": "Zorakl"
+    },
+    "devnet4": {
+      "networkId": "testnet",
+      "url": "https://api.minascan.io/node/devnet/v1/graphql",
+      "keyPath": "keys/devnet4.json",
+      "feepayerKeyPath": "/home/bruno/.cache/zkapp-cli/keys/03-deploy.json",
+      "feepayerAlias": "03-deploy",
+      "fee": "0.1",
+      "smartContract": "Zorakl"
     }
   }
 }
