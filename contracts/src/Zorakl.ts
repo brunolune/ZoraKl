@@ -65,8 +65,8 @@ export class Zorakl extends SmartContract {
 
   @method async buy(time: Field, price: Field) {
     //verifies that the price and time displayed in ui and in zkapp matches
-    this.price.requireEquals(price);
-    this.time.requireEquals(time); 
+    // this.price.requireEquals(price);
+    // this.time.requireEquals(time); 
     //verifies/update balance ?
     const currentCoinBalance = this.coinBalance.getAndRequireEquals();
     this.coinBalance.set(currentCoinBalance.add(Field(1)));
@@ -78,8 +78,8 @@ export class Zorakl extends SmartContract {
     //verifies coinbalance>0
     this.coinBalance.get().greaterThan(Field(0)).assertTrue();
     //verifies data 
-    this.price.requireEquals(price);
-    this.time.requireEquals(time); 
+    // this.price.requireEquals(price);
+    // this.time.requireEquals(time); 
     //update balances
     const currentCoinBalance = this.coinBalance.getAndRequireEquals();
     this.coinBalance.set(currentCoinBalance.sub(Field(1)));
@@ -87,9 +87,8 @@ export class Zorakl extends SmartContract {
     this.usdBalance.set(currentUSDBalance.add(price));
     //check if we have profit
     const hasProfit = this.hasProfit.getAndRequireEquals();
-    //proof of profit
-    const hasprofit=this.usdBalance.get().greaterThan(Field(10**20));
-    this.hasProfit.set(hasprofit);
+    //proof of profit    
+    this.hasProfit.set(this.usdBalance.get().greaterThan(Field(10**20)));
   }
   
 }

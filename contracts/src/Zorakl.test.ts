@@ -165,7 +165,7 @@ describe('Zorakl', () => {
     await txn1.sign([senderKey]).send();
 
     //inputs data
-    price = Field(55118599);
+    price = Field(65118599);
     time = Field(1728319046);
     
     //to avoid rejection due to inequalities of input data with zkApp price and time state
@@ -175,6 +175,7 @@ describe('Zorakl', () => {
     //sell transaction
     const usdBalanceBefore = zkApp.usdBalance.get();
     const coinBalanceBefore = zkApp.coinBalance.get();
+
     const txn2 = await Mina.transaction(senderAccount, async () => {
       await zkApp.sell(time, price);
     });
@@ -182,11 +183,13 @@ describe('Zorakl', () => {
     await txn2.sign([senderKey]).send();
 
     const coinBalanceAfter = zkApp.coinBalance.get();
-    expect(coinBalanceAfter).toEqual(coinBalanceBefore.sub(Field(1)));
     const usdBalanceAfter = zkApp.usdBalance.get();
 
-    expect(usdBalanceAfter).toEqual(usdBalanceBefore.sub(price));
+    expect(coinBalanceAfter).toEqual(coinBalanceBefore.sub(Field(1)));
+    expect(usdBalanceAfter).toEqual(usdBalanceBefore.add(price));
+
     console.log('usdBalanceAfter=', usdBalanceAfter);
+
     //verifies hasProfit is true
     expect(zkApp.hasProfit.get().assertTrue());
   });
