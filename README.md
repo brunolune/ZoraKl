@@ -25,12 +25,12 @@ npm install
 npm run build
 ```
 
-## Test the contract
+## Run the test
 ```sh
 npm run test
 ```
 
-## Run the UI
+## Run the UI on localhost
 ```sh
 cd ZoraKl/ui
 ```
